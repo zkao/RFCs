@@ -44,6 +44,7 @@ where
 ``` net:alice0_
 keygen_a () -> ab ac Ab Ac ar ap Ar Ap kva ksa AAddress
 dl_prove_a ksa -> za Ksa Ta
+param_digest_a Ab Ac Ar Ap Ta kva Ksa -> a_params_digest
 ```
 
 ### commit_alice_session_params Message
@@ -56,7 +57,6 @@ dl_prove_a ksa -> za Ksa Ta
 - `hKsa` -> [`sha256`: `spend`] Commitment to `K_s^a` curve point
 
 ``` net:commit_alice_session_params_
-param_digest_a Ab Ac Ar Ap Ta kva Ksa -> a_params_digest
 send0a a_params_digest -> a_params_digest_b 
 ```
 
@@ -98,11 +98,11 @@ VrfyRfndERRa OKCancl cancel_a refund_a Ar Br_a -> ERRRfnd
 VrfysigRfndOKa OKCancl Bc_a cancel_a b_sig_cancel_a -> OKsigRfnd 
 VrfysigRfndERRa OKCancl Bc_a cancel_a b_sig_cancel_a -> ERRsigRfnd
 
-valid0_a SessOKa DLOK_a OKBuy OKCancl OKRfnd OKPunish OKsigRfnd -> Valid0a
+VrfySend2a SessOKa DLOK_a OKBuy OKCancl OKRfnd OKPunish OKsigRfnd -> OKsend2a
 
-EncSignRfnd_a Valid0a ar Tb_a refund_a -> refund_adaptor_sig
+EncSignRfnd_a OKsend2a ar Tb_a refund_a -> refund_adaptor_sig
 RecKeyRfnd_a Tb_a refund_adaptor_sig -> d' ;; currently dangling, used for monero refund
-SignCancl_a Valid0a ac cancel_a -> a_sig_cancel
+SignCancl_a OKsend2a ac cancel_a -> a_sig_cancel
 ```
 
 ### The refund_procedure_signatures Message
@@ -110,7 +110,7 @@ SignCancl_a Valid0a ac cancel_a -> a_sig_cancel
 - `refund_adaptor_sig` -> refund_adaptor_sig: ECDSA signature The Ar(Tb) refund (e) adaptor signature
 
 ``` net:refund_procedure_signatures_
-send2a a_sig_cancel refund_adaptor_sig -> a_sig_cancel_b refund_adaptor_sig_b
+send2a OKsend2a a_sig_cancel refund_adaptor_sig -> a_sig_cancel_b refund_adaptor_sig_b
 ```
 
 ``` net:alice2_
@@ -147,6 +147,7 @@ where
 ;; bob
 keygen_b () -> kbv ksb bb bc Bb Bc bf Bf br Br BAddress
 dl_prove_b ksb -> zb Ksb Tb
+param_digest_b Bb Bc Br Tb kvb Ksb -> b_params_digest
 ```
 
 ### The `commit_bob_session_params` Message
@@ -159,7 +160,6 @@ dl_prove_b ksb -> zb Ksb Tb
 
 
 ``` net:commit_bob_session_params_
-param_digest_b Bb Bc Br Tb kvb Ksb -> b_params_digest
 send0b b_params_digest -> b_params_digest_a
 ```
 
@@ -188,8 +188,11 @@ priv2pub_b kv_b -> Kv_b
 DLVrfyOKb Ksa_b Ta_b za_b -> DLOK_b 
 DLVrfyERRb Ksa_b Ta_b za_b -> DLERR_b
 
-InitTxs_b SessOKb DLOK_b Ab_b Bb Ac_b Bc Ar_b Br BAddress -> lock cancel refund
+
+InitTxs_b OKsend2b Ab_b Bb Ac_b Bc Ar_b Br BAddress -> lock cancel refund
 Sign_cancel_b bc cancel -> b_sig_cancel
+
+ValidSend2b SessOKb DLOK_b -> OKsend2b
 ```
 
 ### The core_arbitrating_setup Message
@@ -199,7 +202,7 @@ Sign_cancel_b bc cancel -> b_sig_cancel
 - `b_sig_cancel` -> cancel_sig: ECDSA signature The Bc cancel (d) signature
 
 ``` net:core_arbitrating_setup_
-send2b lock cancel refund b_sig_cancel -> lock_a cancel_a refund_a b_sig_cancel_a
+send2b OKsend2b lock cancel refund b_sig_cancel -> lock_a cancel_a refund_a b_sig_cancel_a
 ```
 
 ``` net:bob2_
@@ -208,23 +211,24 @@ EncVrfyRfndERRb Ac Tb refund refund_adaptor_sig_b -> EncERRRfnd_b
 VrfysigCanclOKb Ac cancel a_sig_cancel_b -> OKCanclSig
 VrfysigCanclERRb Ac cancel a_sig_cancel_b -> ERRCanclSig
 
-validRfndCancl EncOKRfnd_b OKCanclSig -> ValidRfndCancl
+VrfyRfndCancl EncOKRfnd_b OKCanclSig -> OKRfndCancl
 
-InitBuy_b ValidRfndCancl lock -> buy
+InitBuy_b OKRfndCancl lock -> buy
 EncSignBuy_b bb Ta_b buy -> buy_adaptor_sig
-RecKeyBuy_b ValidRfndCancl Ta_b buy_adaptor_sig -> d
-Publock_b ValidRfndCancl lock -> lockPublished
+RecKeyBuy_b OKRfndCancl Ta_b buy_adaptor_sig -> d
+Publock_b OKRfndCancl lock -> lockPublished
 
 WatchXlockOKb XlockPublished Kv_b Ks_b -> VrfyXLockMined
 WatchXlockERRb XlockPublished Kv_b Ks_b -> FailXLockMined
 
+ValidSend3b VrfyRfndCancl VrfyXLockMined -> OKsend3b
 ```
 ### The buy_procedure_signature Message
 - `buy` -> buy: BTC transaction The arbitrating buy (c) transaction
 - `buy_adaptor_sig` -> buy_adaptor_sig: ECDSA signature The Bb(Ta) buy (c) adaptor signature
 
 ``` net:buy_procedure_signature_
-send3b VrfyXLockMined buy buy_adaptor_sig -> buy_a buy_adaptor_sig_a
+send3b OKsend3b buy buy_adaptor_sig -> buy_a buy_adaptor_sig_a
 ```
 
 ``` net:bob3_
