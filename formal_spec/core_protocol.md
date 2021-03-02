@@ -56,7 +56,8 @@ dl_prove_a ksa -> za Ksa Ta
 - `hKsa` -> [`sha256`: `spend`] Commitment to `K_s^a` curve point
 
 ``` net:commit_alice_session_params_
-send0a hAb hAc hAr hAp hTa hkva hKsa  -> hAb_b hAc_b hAr_b hAp_b hTa_b hkva_b hKsa_b
+param_digest_a Ab Ac Ar Ap Ta kva Ksa -> a_params_digest
+send0a a_params_digest -> a_params_digest_b 
 ```
 
 ### The reveal_alice_session_params Message
@@ -75,8 +76,8 @@ send1a kva Ksa Ab Ta Ac Ar Ap AAddress za  -> kva_b Ksa_b Ab_b Ta_b Ac_b Ar_b Ap
 ```
 
 ``` net:alice1_
-sess_paramsOKa hBb_a Bb_a hBc_a Bc_a hBr_a Br_a hTb_a Tb_a hkvb_a kbv_a hKsb_a Ksb_a -> SessOKa
-sess_paramsERRa hBb_a Bb_a hBc_a Bc_a hBr_a Br_a hTb_a Tb_a hkvb_a kbv_a hKsb_a Ksb_a -> SessERRa
+sess_paramsOKa  b_params_digest_a Bb_a Bc_a Br_a Tb_a kbv_a Ksb_a -> SessOKa
+sess_paramsERRa b_params_digest_a Bb_a Bc_a Br_a Tb_a kbv_a Ksb_a -> SessERRa
 
 aggreg_priv_view_a kva kbv_a -> kv_a
 aggreg_pub_spend_a Ksa Ksb_a -> Ks_a
@@ -158,8 +159,10 @@ dl_prove_b ksb -> zb Ksb Tb
 
 
 ``` net:commit_bob_session_params_
-send0b hBb hBc hBr hTb hkvb hKsb -> hBb_a hBc_a hBr_a hTb_a hkvb_a hKsb_a
+param_digest_b Bb Bc Br Tb kvb Ksb -> b_params_digest
+send0b b_params_digest -> b_params_digest_a
 ```
+
 ### The reveal_bob_session_params Message
 - `Bb` -> b: secp256k1 curve point The buy Bb public key
 - `Bc` -> c: secp256k1 curve point The cancel Bc public key
@@ -175,8 +178,8 @@ send1b kbv Ksb Bb Tb Bc zb Br BAddress -> kbv_a Ksb_a Bb_a Tb_a Bc_a zb_a Br_a B
 ```
 
 ```net:bob1_
-sess_paramsOKb hAb_b Ab_b hAc_b Ac_b hAr_b Ar_b hAp_b Ap_b hTa_b Ta_b hkva_b kva_b hKsa_b Ksa_b -> SessOKb
-sess_paramsERRb hAb_b Ab_b hAc_b Ac_b hAr_b Ar_b hAp_b Ap_b hTa_b Ta_b hkva_b kva_b hKsa_b Ksa_b -> SessERRb
+sess_paramsOKb  a_params_digest_b Ab_b Ac_b Ar_b Ap_b Ta_b kva_b Ksa_b -> SessOKb
+sess_paramsERRb a_params_digest_b Ab_b Ac_b Ar_b Ap_b Ta_b kva_b Ksa_b -> SessERRb
 
 aggreg_priv_view_a kva_b kbv -> kv_b
 aggreg_pub_spend_b Ksa_b Ksb -> Ks_b
