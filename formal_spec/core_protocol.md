@@ -46,6 +46,19 @@ keygen_a () -> ab ac Ab Ac ar ap Ar Ap kva ksa AAddress
 dl_prove_a ksa -> za Ksa Ta
 ```
 
+### commit_alice_session_params Message
+- `hAb` -> [`sha256`: `buy`] Commitment to `Ab` curve point
+- `hAc` -> [`sha256`: `cancel`] Commitment to `Ac` curve point
+- `hAr` -> [`sha256`: `refund`] Commitment to `Ar` curve point
+- `hAp` -> [`sha256`: `punish`] Commitment to `Ap` curve point
+- `hTa` -> [`sha256`: `adaptor`] Commitment to `Ta` curve point
+- `hkva` -> [`sha256`: `view`] Commitment to `k_v^a` scalar
+- `hKsa` -> [`sha256`: `spend`] Commitment to `K_s^a` curve point
+
+``` net:commit_alice_session_params_
+send0a hAb hAc hAr hAp hTa hkva hKsa  -> hAb_b hAc_b hAr_b hAp_b hTa_b hkva_b hKsa_b
+```
+
 ### The reveal_alice_session_params Message
 - `Ab` -> b: secp256k1 curve point The buy Ab public key
 - `Ac` -> c: secp256k1 curve point The cancel Ac public key
@@ -58,10 +71,13 @@ dl_prove_a ksa -> za Ksa Ta
 - `za` -> z: DLEQ proof The cross-group discrete logarithm zero-knowledge proof
 
 ``` net:reveal_alice_session_params_
-send0a kva Ksa Ab Ta Ac Ar Ap AAddress za  -> kva_b Ksa_b Ab_b Ta_b Ac_b Ar_b Ap_b AAddress_b  za_b
+send1a kva Ksa Ab Ta Ac Ar Ap AAddress za  -> kva_b Ksa_b Ab_b Ta_b Ac_b Ar_b Ap_b AAddress_b za_b
 ```
 
 ``` net:alice1_
+sess_paramsOKa hBb_a Bb_a hBc_a Bc_a hBr_a Br_a hTb_a Tb_a hkvb_a kbv_a hKsb_a Ksb_a -> SessOKa
+sess_paramsERRa hBb_a Bb_a hBc_a Bc_a hBr_a Br_a hTb_a Tb_a hkvb_a kbv_a hKsb_a Ksb_a -> SessERRa
+
 aggreg_priv_view_a kva kbv_a -> kv_a
 aggreg_pub_spend_a Ksa Ksb_a -> Ks_a
 priv2pub_a kv_a -> Kv_a
@@ -81,7 +97,7 @@ VrfyRfndERRa OKCancl cancel_a refund_a Ar Br_a -> ERRRfnd
 VrfysigRfndOKa OKCancl Bc_a cancel_a b_sig_cancel_a -> OKsigRfnd 
 VrfysigRfndERRa OKCancl Bc_a cancel_a b_sig_cancel_a -> ERRsigRfnd
 
-valid0_a DLOK_a OKBuy OKCancl OKRfnd OKPunish OKsigRfnd -> Valid0a
+valid0_a SessOKa DLOK_a OKBuy OKCancl OKRfnd OKPunish OKsigRfnd -> Valid0a
 
 EncSignRfnd_a Valid0a ar Tb_a refund_a -> refund_adaptor_sig
 RecKeyRfnd_a Tb_a refund_adaptor_sig -> d' ;; currently dangling, used for monero refund
@@ -93,7 +109,7 @@ SignCancl_a Valid0a ac cancel_a -> a_sig_cancel
 - `refund_adaptor_sig` -> refund_adaptor_sig: ECDSA signature The Ar(Tb) refund (e) adaptor signature
 
 ``` net:refund_procedure_signatures_
-send1a a_sig_cancel refund_adaptor_sig -> a_sig_cancel_b refund_adaptor_sig_b
+send2a a_sig_cancel refund_adaptor_sig -> a_sig_cancel_b refund_adaptor_sig_b
 ```
 
 ``` net:alice2_
@@ -125,12 +141,25 @@ PubBuyTx buy_a s12 -> buyPublished
 where
     `Tb` = K_s^b projection over secp256k1
 
+
 ``` net:bob0_
 ;; bob
 keygen_b () -> kbv ksb bb bc Bb Bc bf Bf br Br BAddress
 dl_prove_b ksb -> zb Ksb Tb
 ```
 
+### The `commit_bob_session_params` Message
+- `hBb` -> [`sha256`: `buy`] Commitment to `Bb` curve point
+- `hBc` -> [`sha256`: `cancel`] Commitment to `Bc` curve point
+- `hBr` -> [`sha256`: `refund`] Commitment to `Br` curve point
+- `hTb` -> [`sha256`: `adaptor`] Commitment to `Tb` curve point
+- `hkvb` -> [`sha256`: `view`] Commitment to `k_v^b` scalar
+- `hKsb` -> [`sha256`: `spend`] Commitment to `K_s^b` curve point
+
+
+``` net:commit_bob_session_params_
+send0b hBb hBc hBr hTb hkvb hKsb -> hBb_a hBc_a hBr_a hTb_a hkvb_a hKsb_a
+```
 ### The reveal_bob_session_params Message
 - `Bb` -> b: secp256k1 curve point The buy Bb public key
 - `Bc` -> c: secp256k1 curve point The cancel Bc public key
@@ -142,10 +171,13 @@ dl_prove_b ksb -> zb Ksb Tb
 - `zb` -> z: DLEQ proof The cross-group discrete logarithm zero-knowledge proof 
 
 ``` net:reveal_bob_session_params_
-send0b kbv Ksb Bb Tb Bc zb Br BAddress -> kbv_a Ksb_a Bb_a Tb_a Bc_a zb_a Br_a BAddress_a
+send1b kbv Ksb Bb Tb Bc zb Br BAddress -> kbv_a Ksb_a Bb_a Tb_a Bc_a zb_a Br_a BAddress_a
 ```
 
 ```net:bob1_
+sess_paramsOKb hAb_b Ab_b hAc_b Ac_b hAr_b Ar_b hAp_b Ap_b hTa_b Ta_b hkva_b kva_b hKsa_b Ksa_b -> SessOKb
+sess_paramsERRb hAb_b Ab_b hAc_b Ac_b hAr_b Ar_b hAp_b Ap_b hTa_b Ta_b hkva_b kva_b hKsa_b Ksa_b -> SessERRb
+
 aggreg_priv_view_a kva_b kbv -> kv_b
 aggreg_pub_spend_b Ksa_b Ksb -> Ks_b
 priv2pub_b kv_b -> Kv_b
@@ -153,7 +185,7 @@ priv2pub_b kv_b -> Kv_b
 DLVrfyOKb Ksa_b Ta_b za_b -> DLOK_b 
 DLVrfyERRb Ksa_b Ta_b za_b -> DLERR_b
 
-InitTxs_b DLOK_b Ab_b Bb Ac_b Bc Ar_b Br BAddress -> lock cancel refund
+InitTxs_b SessOKb DLOK_b Ab_b Bb Ac_b Bc Ar_b Br BAddress -> lock cancel refund
 Sign_cancel_b bc cancel -> b_sig_cancel
 ```
 
@@ -164,7 +196,7 @@ Sign_cancel_b bc cancel -> b_sig_cancel
 - `b_sig_cancel` -> cancel_sig: ECDSA signature The Bc cancel (d) signature
 
 ``` net:core_arbitrating_setup_
-send1b lock cancel refund b_sig_cancel -> lock_a cancel_a refund_a b_sig_cancel_a
+send2b lock cancel refund b_sig_cancel -> lock_a cancel_a refund_a b_sig_cancel_a
 ```
 
 ``` net:bob2_
@@ -189,7 +221,7 @@ WatchXlockERRb XlockPublished Kv_b Ks_b -> FailXLockMined
 - `buy_adaptor_sig` -> buy_adaptor_sig: ECDSA signature The Bb(Ta) buy (c) adaptor signature
 
 ``` net:buy_procedure_signature_
-send2b VrfyXLockMined buy buy_adaptor_sig -> buy_a buy_adaptor_sig_a
+send3b VrfyXLockMined buy buy_adaptor_sig -> buy_a buy_adaptor_sig_a
 ```
 
 ``` net:bob3_
