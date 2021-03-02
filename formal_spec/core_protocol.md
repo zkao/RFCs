@@ -66,22 +66,22 @@ aggreg_priv_view_a kva kbv_a -> kv_a
 aggreg_pub_spend_a Ksa Ksb_a -> Ks_a
 priv2pub_a kv_a -> Kv_a
 
-DLVrfyOKa Ksb_a Tb_a zb_a -> DLVrfyed_a 
-DLVrfyERRa Ksb_a Tb_a zb_a -> DLFailed_a
+DLVrfyOKa Ksb_a Tb_a zb_a -> DLOK_a 
+DLVrfyERRa Ksb_a Tb_a zb_a -> DLERR_a
 
-VrfyBuyOKa lock_a buy_a Ab Bb_a -> VrfyedBuy
-VrfyBuyERRa lock_a buy_a Ab Bb_a -> FailedBuy
+VrfyBuyOKa lock_a buy_a Ab Bb_a -> OKBuy
+VrfyBuyERRa lock_a buy_a Ab Bb_a -> ERRBuy
 
-VrfyCanclOKa lock_a cancel_a Ac Bc_a  -> VrfyedCancl
-VrfyCanclERRa lock_a cancel_a Ac Bc_a  -> FailedCancl
+VrfyCanclOKa lock_a cancel_a Ac Bc_a  -> OKCancl
+VrfyCanclERRa lock_a cancel_a Ac Bc_a  -> ERRCancl
 
-VrfyRfndOKa VrfyedCancl cancel_a refund_a Ar Br_a -> VrfyedRfnd 
-VrfyRfndERRa VrfyedCancl cancel_a refund_a Ar Br_a -> FailedRfnd
+VrfyRfndOKa OKCancl cancel_a refund_a Ar Br_a -> OKRfnd 
+VrfyRfndERRa OKCancl cancel_a refund_a Ar Br_a -> ERRRfnd
 
-VrfysigRfndOKa VrfyedCancl Bc_a cancel_a b_sig_cancel_a -> VrfyedsigRfnd 
-VrfysigRfndERRa VrfyedCancl Bc_a cancel_a b_sig_cancel_a -> FailedsigRfnd
+VrfysigRfndOKa OKCancl Bc_a cancel_a b_sig_cancel_a -> OKsigRfnd 
+VrfysigRfndERRa OKCancl Bc_a cancel_a b_sig_cancel_a -> ERRsigRfnd
 
-valid0_a DLVrfyed_a VrfyedBuy VrfyedCancl VrfyedRfnd VrfyedPunish VrfyedsigRfnd -> Valid0a
+valid0_a DLOK_a OKBuy OKCancl OKRfnd OKPunish OKsigRfnd -> Valid0a
 
 EncSignRfnd_a Valid0a ar Tb_a refund_a -> refund_adaptor_sig
 RecKeyRfnd_a Tb_a refund_adaptor_sig -> d' ;; currently dangling, used for monero refund
@@ -97,15 +97,15 @@ send1a a_sig_cancel refund_adaptor_sig -> a_sig_cancel_b refund_adaptor_sig_b
 ```
 
 ``` net:alice2_
-EncVrfyBuyOKa Bb_a Ta buy_a -> EncVrfyedBuy_a
-EncVrfyBuyERRa Bb_a Ta buy_a -> EncFailedBuy_a
+EncVrfyBuyOKa Bb_a Ta buy_a -> EncOKBuy_a
+EncVrfyBuyERRa Bb_a Ta buy_a -> EncERRBuy_a
 WatchlockOKa lockPublished lock -> VrfylockMined
 WatchlockERRa lockPublished lock -> FaillockMined
 
 InitXlock_a Kv_a Ks_a -> Xlock
 PubXlock_a VrfylockMined Xlock -> XlockPublished
 
-DecSig_buy_a EncVrfyedBuy_a ksa buy_adaptor_sig_a -> s1
+DecSig_buy_a EncOKBuy_a ksa buy_adaptor_sig_a -> s1
 Sign_buy_a ab buy_a -> s2
 aggreg0a s1 s2 -> s12
 PubBuyTx buy_a s12 -> buyPublished
@@ -150,10 +150,10 @@ aggreg_priv_view_a kva_b kbv -> kv_b
 aggreg_pub_spend_b Ksa_b Ksb -> Ks_b
 priv2pub_b kv_b -> Kv_b
 
-DLVrfyOKb Ksa_b Ta_b za_b -> DLVrfyed_b 
-DLVrfyERRb Ksa_b Ta_b za_b -> DLFailed_b
+DLVrfyOKb Ksa_b Ta_b za_b -> DLOK_b 
+DLVrfyERRb Ksa_b Ta_b za_b -> DLERR_b
 
-InitTxs_b DLVrfyed_b Ab_b Bb Ac_b Bc Ar_b Br BAddress -> lock cancel refund
+InitTxs_b DLOK_b Ab_b Bb Ac_b Bc Ar_b Br BAddress -> lock cancel refund
 Sign_cancel_b bc cancel -> b_sig_cancel
 ```
 
@@ -168,17 +168,17 @@ send1b lock cancel refund b_sig_cancel -> lock_a cancel_a refund_a b_sig_cancel_
 ```
 
 ``` net:bob2_
-EncVrfyRfndOKb Ac Tb refund refund_adaptor_sig_b -> EncVrfyedRfnd_b
-EncVrfyRfndERRb Ac Tb refund refund_adaptor_sig_b -> EncFailedRfnd_b
-VrfysigCanclOKb Ac cancel a_sig_cancel_b ->Vrfyed0b
-VrfysigCanclERRb Ac cancel a_sig_cancel_b -> Failed0b
+EncVrfyRfndOKb Ac Tb refund refund_adaptor_sig_b -> EncOKRfnd_b
+EncVrfyRfndERRb Ac Tb refund refund_adaptor_sig_b -> EncERRRfnd_b
+VrfysigCanclOKb Ac cancel a_sig_cancel_b -> OKCanclSig
+VrfysigCanclERRb Ac cancel a_sig_cancel_b -> ERRCanclSig
 
-valid0_b EncVrfyedRfnd_b Vrfyed0b -> Valid0b
+validRfndCancl EncOKRfnd_b OKCanclSig -> ValidRfndCancl
 
-InitBuy_b Valid0b lock -> buy
+InitBuy_b ValidRfndCancl lock -> buy
 EncSignBuy_b bb Ta_b buy -> buy_adaptor_sig
-RecKeyBuy_b Valid0b Ta_b buy_adaptor_sig -> d
-Publock_b Valid0b lock -> lockPublished
+RecKeyBuy_b ValidRfndCancl Ta_b buy_adaptor_sig -> d
+Publock_b ValidRfndCancl lock -> lockPublished
 
 WatchXlockOKb XlockPublished Kv_b Ks_b -> VrfyXLockMined
 WatchXlockERRb XlockPublished Kv_b Ks_b -> FailXLockMined
