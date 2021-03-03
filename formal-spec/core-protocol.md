@@ -44,7 +44,7 @@ where
 ``` net:alice0_
 keygen_a () -> ab ac Ab Ac ar ap Ar Ap kva ksa AAddress
 dl_prove_a ksa -> za Ksa Ta
-param_digest_a Ab Ac Ar Ap Ta kva Ksa -> a_params_digest
+param_digest_a Ab Ac Ar Ap Ta kva Ksa -> ACommit
 ```
 
 ### commit_alice_session_params Message
@@ -57,7 +57,7 @@ param_digest_a Ab Ac Ar Ap Ta kva Ksa -> a_params_digest
 - `hKsa` -> [`sha256`: `spend`] Commitment to `K_s^a` curve point
 
 ``` net:commit_alice_session_params_
-send0a a_params_digest -> a_params_digest_b 
+send0a ACommit -> ACommit_b 
 ```
 
 ### The reveal_alice_session_params Message
@@ -147,7 +147,8 @@ where
 ;; bob
 keygen_b () -> kbv ksb bb bc Bb Bc bf Bf br Br BAddress
 dl_prove_b ksb -> zb Ksb Tb
-param_digest_b Bb Bc Br Tb kvb Ksb -> b_params_digest
+param_
+digest_b Bb Bc Br Tb kvb Ksb -> b_params_digest
 ```
 
 ### The `commit_bob_session_params` Message
@@ -178,8 +179,8 @@ send1b kbv Ksb Bb Tb Bc zb Br BAddress -> kbv_a Ksb_a Bb_a Tb_a Bc_a zb_a Br_a B
 ```
 
 ```net:bob1_
-sess_paramsOKb  a_params_digest_b Ab_b Ac_b Ar_b Ap_b Ta_b kva_b Ksa_b -> SessOKb
-sess_paramsERRb a_params_digest_b Ab_b Ac_b Ar_b Ap_b Ta_b kva_b Ksa_b -> SessERRb
+sess_paramsOKb  ACommit_b Ab_b Ac_b Ar_b Ap_b Ta_b kva_b Ksa_b -> SessOKb
+sess_paramsERRb ACommit_b Ab_b Ac_b Ar_b Ap_b Ta_b kva_b Ksa_b -> SessERRb
 
 aggreg_priv_view_a kva_b kbv -> kv_b
 aggreg_pub_spend_b Ksa_b Ksb -> Ks_b

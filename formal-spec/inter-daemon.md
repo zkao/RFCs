@@ -1,9 +1,9 @@
 ``` net:commit_alice_session_params_
-send0a a_params_digest -> Sent0a a_params_digest_b 
+send0a ACommit -> Sent0a ACommit_b 
 ```
 
 ``` net:commit_bob_session_params_
-send0b b_params_digest -> Sent0b b_params_digest_a
+send0b BCommit -> Sent0b BCommit_a
 ```
 
 ``` net:reveal_alice_session_params_
